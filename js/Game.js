@@ -1,9 +1,12 @@
 var TopDownGame = TopDownGame || {},
+	debug = false,
 	leftKey,
 	rightKey,
 	upKey,
 	downKey,
-	pauseKey;
+	pauseKey,
+	debugKey,
+	lives;
 
 TopDownGame.Game = function() {};
 
@@ -42,11 +45,22 @@ TopDownGame.Game.prototype = {
 		//allowing character to move
 		this.cursors = this.game.input.keyboard.createCursorKeys();
 
+		//lives counter
+		lives = this.game.add.group();
+		lives.create(32, 6, 'life');
+		lives.create(64, 6, 'life');
+		lives.create(96, 6, 'life');
+
 		leftKey = this.game.input.keyboard.addKey(Phaser.Keyboard.A);
 		rightKey = this.game.input.keyboard.addKey(Phaser.Keyboard.D);
 		upKey = this.game.input.keyboard.addKey(Phaser.Keyboard.W);
 		downKey = this.game.input.keyboard.addKey(Phaser.Keyboard.S);
 		pauseKey = this.game.input.keyboard.addKey(Phaser.Keyboard.P);
+		debugKey = this.game.input.keyboard.addKey(Phaser.Keyboard.F);
+
+		//adding touch controlls
+		this.game.input.touch.enabled = true;
+		// this.game.input.onDown.add(this.touched, this);
 	},
 
 	//find objects in a Tiled layer that containt a property called "type" equal to a certain value
@@ -93,12 +107,24 @@ TopDownGame.Game.prototype = {
 	debugInformation: function() {
 		var fps = this.game.time.fps;
 
-		fpsCounter = this.game.add.text(20, 10, 'FPS: ' + fps, {
-			font: '16px Arial',
-			fill: '#fff',
-			stroke: '#000',
-			strokeThickness: 3
-		});
+		if (debug) {
+			fpsCounter = this.game.add.text(20, 10, 'FPS: ' + fps, {
+				font: '16px Arial',
+				fill: '#fff',
+				stroke: '#000',
+				strokeThickness: 3
+			});
+		}
+	},
+	touched: function(event) {
+		// @todo: make this work
+		console.log(event);
+		this.game.physics.arcade.moveToXY(this.player, event.position.x, event.position.y, 130, 10000);
+	},
+	loseLife: function(player, shadow) {
+		this.player.reset(64, 64);
+		lives.removeChild(lives.children[lives.total - 1]);
+		// this.shadow.reset(shadowLocation[0].x, shadowLocation[0].y);
 	},
 	update: function() {
 		//player movement
@@ -122,16 +148,28 @@ TopDownGame.Game.prototype = {
 			this.game.pause();
 		}
 
-		this.debugInformation();
+		if(debugKey.isDown) {
+			debug = !debug;
+		}
+
+		// @todo: right now, it makes a new line of text each frame, that's really bad
+		// this.debugInformation();
 
 		//Collision
 		this.game.physics.arcade.collide(this.player, this.collisionLayer);
+		this.game.physics.arcade.collide(this.shadow, this.collisionLayer);
+		this.game.physics.arcade.overlap(this.player, this.shadow, this.loseLife, null, this);
 		this.game.physics.arcade.overlap(this.player, this.gems, this.collect, null, this);
 
 		//Checking the shadow && player position to switch sprites when needed
 		this.switchShadow(this.player, this.shadow);
 
 		//Win condition
+
+		//Loss condition
+		if(lives.total === 0) {
+			this.state.start('GameOver');
+		}
 
 	}
 };

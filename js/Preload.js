@@ -8,6 +8,7 @@ TopDownGame.Preload.prototype = {
 		//load game assets
 		this.load.tilemap('map', 'assets/tilemaps/map.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.image('tiles', 'assets/images/tiles.png');
+		this.load.image('life', 'assets/images/heart.png');
 		this.load.image('redGem', 'assets/images/redGem.png');
 		this.load.image('blueGem', 'assets/images/blueGem.png');
 		this.load.image('player', 'assets/images/player.png');
@@ -16,6 +17,8 @@ TopDownGame.Preload.prototype = {
 
 		//Set advanced timing for FPS readout
 		this.game.time.advancedTiming = true;
+
+		this.game.input.touch.enabled = true;
 	},
 	create: function() {
 		welcomeMessage = this.game.add.text(175, 50, 'Top Down 2!', { font: '50px Arial', fill: '#fff' });
