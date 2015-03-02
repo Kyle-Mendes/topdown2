@@ -100,11 +100,11 @@ TopDownGame.Game.prototype = {
 		var toMove = false,
 			speed = 600;
 
-		if (this.player.y + 16 > this.game.camera.y + h) {
+		if (this.player.y > this.game.camera.y + h) {
 			cameraY += 1;
 			toMove = true;
 		}
-		else if (this.player.y - 16 < this.game.camera.y) {
+		else if (this.player.y < this.game.camera.y) {
 			console.log(this.player.y, this.game.camera.y);
 			cameraY -= 1;
 			toMove = true;
@@ -135,11 +135,11 @@ TopDownGame.Game.prototype = {
 		if(deltaX < 160 && deltaY < 160) {
 			shadow.loadTexture('enemy');
 			shadow.alpha = 1;
-			this.game.physics.arcade.moveToObject(shadow, player, 100);
+			this.game.physics.arcade.moveToObject(shadow, player, 115);
 		} else {
 			shadow.loadTexture('shadow');
 			shadow.alpha = .8;
-			this.game.physics.arcade.moveToObject(shadow, player, 50);
+			this.game.physics.arcade.moveToObject(shadow, player, 80);
 		}
 	},
 	debugInformation: function() {
@@ -167,20 +167,21 @@ TopDownGame.Game.prototype = {
 	},
 	update: function() {
 		//player movement
+		//@todo fine tune this.  doesn't feel right.
 		this.player.body.velocity.x = 0;
 		this.player.body.velocity.y = 0;
 
 		if(this.cursors.up.isDown || upKey.isDown) {
-			this.player.body.velocity.y -= 300;
+			this.player.body.velocity.y -= 130;
 		}
 		else if(this.cursors.down.isDown || downKey.isDown) {
-			this.player.body.velocity.y += 300;
+			this.player.body.velocity.y += 130;
 		}
 		if(this.cursors.left.isDown || leftKey.isDown) {
-			this.player.body.velocity.x -= 300;
+			this.player.body.velocity.x -= 130;
 		}
 		else if(this.cursors.right.isDown || rightKey.isDown) {
-			this.player.body.velocity.x += 300;
+			this.player.body.velocity.x += 130;
 		}
 
 		if(pauseKey.isDown) {
