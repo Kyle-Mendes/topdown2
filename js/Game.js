@@ -1,5 +1,9 @@
 var TopDownGame = TopDownGame || {},
 	debug = false,
+	h = 640,
+	w = 640,
+	cameraX = 0,
+	cameraY = 0,
 	leftKey,
 	rightKey,
 	upKey,
@@ -39,14 +43,12 @@ TopDownGame.Game.prototype = {
 		this.shadow = this.game.add.sprite(shadowLocation[0].x, shadowLocation[0].y, 'shadow');
 		this.game.physics.arcade.enable(this.shadow);
 
-		//setting the camera to follow our player
-		this.game.camera.follow(this.player);
-
 		//allowing character to move
 		this.cursors = this.game.input.keyboard.createCursorKeys();
 
 		//lives counter
 		lives = this.game.add.group();
+		lives.fixedToCamera = true;
 		lives.create(32, 6, 'life');
 		lives.create(64, 6, 'life');
 		lives.create(96, 6, 'life');
@@ -87,6 +89,42 @@ TopDownGame.Game.prototype = {
 			sprite[key] = element.properties[key];
 		});
 	},
+	moveCamera: function() {
+		// @todo: fix camera movement.  maybe stop player movement while camera moving?
+
+		// Don't allow tweens to build up if you go back and forth really fast
+		if (this.tween)
+			return;
+
+		this.tween = true;
+		var toMove = false,
+			speed = 600;
+
+		if (this.player.y + 16 > this.game.camera.y + h) {
+			cameraY += 1;
+			toMove = true;
+		}
+		else if (this.player.y - 16 < this.game.camera.y) {
+			console.log(this.player.y, this.game.camera.y);
+			cameraY -= 1;
+			toMove = true;
+		}
+		else if (this.player.x > this.game.camera.x + w) {
+			cameraX += 1;
+			toMove = true;
+		}
+		else if (this.player.x < this.game.camera.x) {
+			cameraX -= 1;
+			toMove = true;
+		}
+		if (toMove) {
+			var t = this.game.add.tween(this.game.camera).to({x: cameraX * w, y: cameraY * h}, speed);
+			t.start();
+			t.onComplete.add(function(){this.tween = false;}, this);
+		} else {
+			this.tween = false;
+		}
+	},
 	collect: function(player, collectable) {
 		collectable.destroy();
 	},
@@ -95,13 +133,13 @@ TopDownGame.Game.prototype = {
 		var deltaY = Math.abs(player.position.y - shadow.position.y);
 
 		if(deltaX < 160 && deltaY < 160) {
-			// console.log('They\'re close!', shadow.texture);
 			shadow.loadTexture('enemy');
+			shadow.alpha = 1;
 			this.game.physics.arcade.moveToObject(shadow, player, 100);
 		} else {
-			// console.log('They\'re far!', shadow.texture);
 			shadow.loadTexture('shadow');
-			shadow.body.velocity.setTo(0,0);
+			shadow.alpha = .8;
+			this.game.physics.arcade.moveToObject(shadow, player, 50);
 		}
 	},
 	debugInformation: function() {
@@ -124,7 +162,8 @@ TopDownGame.Game.prototype = {
 	loseLife: function(player, shadow) {
 		this.player.reset(64, 64);
 		lives.removeChild(lives.children[lives.total - 1]);
-		// this.shadow.reset(shadowLocation[0].x, shadowLocation[0].y);
+		cameraX = 0; cameraY = 0;
+		this.game.camera.focusOnXY(0,0);
 	},
 	update: function() {
 		//player movement
@@ -132,16 +171,16 @@ TopDownGame.Game.prototype = {
 		this.player.body.velocity.y = 0;
 
 		if(this.cursors.up.isDown || upKey.isDown) {
-			this.player.body.velocity.y -= 130;
+			this.player.body.velocity.y -= 300;
 		}
 		else if(this.cursors.down.isDown || downKey.isDown) {
-			this.player.body.velocity.y += 130;
+			this.player.body.velocity.y += 300;
 		}
 		if(this.cursors.left.isDown || leftKey.isDown) {
-			this.player.body.velocity.x -= 130;
+			this.player.body.velocity.x -= 300;
 		}
 		else if(this.cursors.right.isDown || rightKey.isDown) {
-			this.player.body.velocity.x += 130;
+			this.player.body.velocity.x += 300;
 		}
 
 		if(pauseKey.isDown) {
@@ -154,10 +193,12 @@ TopDownGame.Game.prototype = {
 
 		// @todo: right now, it makes a new line of text each frame, that's really bad
 		// this.debugInformation();
+		//
+		// Taking care of the camera
+		this.moveCamera();
 
 		//Collision
 		this.game.physics.arcade.collide(this.player, this.collisionLayer);
-		this.game.physics.arcade.collide(this.shadow, this.collisionLayer);
 		this.game.physics.arcade.overlap(this.player, this.shadow, this.loseLife, null, this);
 		this.game.physics.arcade.overlap(this.player, this.gems, this.collect, null, this);
 
