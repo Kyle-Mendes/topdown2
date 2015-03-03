@@ -7,6 +7,7 @@ TopDownGame.Preload.prototype = {
 	preload: function() {
 		//load game assets
 		this.load.tilemap('map', 'assets/tilemaps/map.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.tilemap('map2', 'assets/tilemaps/map2.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.image('tiles', 'assets/images/tiles.png');
 		this.load.image('life', 'assets/images/heart.png');
 		this.load.image('closedTrapdoor', 'assets/images/closedTrapdoor.png');

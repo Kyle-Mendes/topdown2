@@ -12,7 +12,7 @@ var TopDownGame = TopDownGame || {},
 	debugKey,
 	lives;
 
-TopDownGame.Game = function() {};
+// TopDownGame.Game = function() {};
 
 //title screen
 TopDownGame.Game.prototype = {
@@ -92,6 +92,12 @@ TopDownGame.Game.prototype = {
 
 		//copy all properties to the sprite
 		Object.keys(element.properties).forEach(function(key){
+			//Set booleans from a string to a proper boolean
+			if(element.properties[key] == "true") {
+				element.properties[key] = true;
+			} else if(element.properties[key] == "false") {
+				element.properties[key] = false;
+			}
 			sprite[key] = element.properties[key];
 		});
 	},
@@ -117,45 +123,7 @@ TopDownGame.Game.prototype = {
 			this.createFromTiledObject(element, this.keys);
 		}, this);
 	},
-	moveCamera: function() {
-		// @todo: fix camera movement.  maybe stop player movement while camera moving?
-		// @todo: find a way to make this work with touch controls?
-
-		// Don't allow tweens to build up if you go back and forth really fast
-		if (this.tween)
-			return;
-
-		this.tween = true;
-		var toMove = false,
-			speed = 600;
-
-		if (this.player.y > this.game.camera.y + h) {
-			cameraY += 1;
-			toMove = true;
-		}
-		else if (this.player.y < this.game.camera.y) {
-			console.log(this.player.y, this.game.camera.y);
-			cameraY -= 1;
-			toMove = true;
-		}
-		else if (this.player.x > this.game.camera.x + w) {
-			cameraX += 1;
-			toMove = true;
-		}
-		else if (this.player.x < this.game.camera.x) {
-			cameraX -= 1;
-			toMove = true;
-		}
-		if (toMove) {
-			var t = this.game.add.tween(this.game.camera).to({x: cameraX * w, y: cameraY * h}, speed);
-			t.start();
-			t.onComplete.add(function(){this.tween = false;}, this);
-		} else {
-			this.tween = false;
-		}
-	},
 	collect: function(player, collectable) {
-		console.log(collectable);
 		if(collectable.type == 'key') {
 			this.openDoor(collectable);
 		}
@@ -166,8 +134,17 @@ TopDownGame.Game.prototype = {
 		this.doors.forEach(function(door) {
 			if(door.doorID == doorID) {
 				door.loadTexture('openTrapdoor');
+				door.open = true;
 			}
 		});
+	},
+	changeMap: function(player, door) {
+		if(!door.open) {
+			console.log(door.open);
+			return;
+		}
+		var newMap = door.targetTilemap;
+		this.game.state.start()
 	},
 	switchShadow: function(player, shadow) {
 		var deltaX = Math.abs(player.position.x - shadow.position.x);
@@ -182,11 +159,6 @@ TopDownGame.Game.prototype = {
 			shadow.alpha = .8;
 			this.game.physics.arcade.moveToObject(shadow, player, 80);
 		}
-	},
-	touched: function(point) {
-		// @todo: make this work
-		this.game.physics.arcade.moveToXY(this.player, point.x, point.y, 130);
-		// this.game.physics.arcade.moveToXY(this.player, event.position.x, event.position.y, 130, 10000);
 	},
 	loseLife: function(player, shadow) {
 		this.player.reset(64, 64);
@@ -225,11 +197,9 @@ TopDownGame.Game.prototype = {
 			debug = !debug;
 		}
 
-		// Taking care of the camera
-		// this.moveCamera();
-
 		//Collision
 		this.game.physics.arcade.collide(this.player, this.collisionLayer);
+		this.game.physics.arcade.overlap(this.player, this.doors, this.changeMap, null, this);
 		this.game.physics.arcade.overlap(this.player, this.keys, this.collect, null, this);
 		this.game.physics.arcade.overlap(this.player, this.shadow, this.loseLife, null, this);
 
