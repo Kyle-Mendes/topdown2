@@ -18,7 +18,9 @@ TopDownGame.Preload.prototype = {
 		//Set advanced timing for FPS readout
 		this.game.time.advancedTiming = true;
 
+		//@todo: figure out the console error on touch
 		this.game.input.touch.enabled = true;
+		this.game.maxPointers = 1;
 	},
 	create: function() {
 		welcomeMessage = this.game.add.text(175, 50, 'Top Down 2!', { font: '50px Arial', fill: '#fff' });

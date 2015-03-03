@@ -46,6 +46,9 @@ TopDownGame.Game.prototype = {
 		//allowing character to move
 		this.cursors = this.game.input.keyboard.createCursorKeys();
 
+		//camera follows the player
+		this.game.camera.follow(this.player);
+
 		//lives counter
 		lives = this.game.add.group();
 		lives.fixedToCamera = true;
@@ -62,7 +65,6 @@ TopDownGame.Game.prototype = {
 
 		//adding touch controlls
 		this.game.input.touch.enabled = true;
-		// this.game.input.onDown.add(this.touched, this);
 	},
 
 	//find objects in a Tiled layer that containt a property called "type" equal to a certain value
@@ -91,6 +93,7 @@ TopDownGame.Game.prototype = {
 	},
 	moveCamera: function() {
 		// @todo: fix camera movement.  maybe stop player movement while camera moving?
+		// @todo: find a way to make this work with touch controls
 
 		// Don't allow tweens to build up if you go back and forth really fast
 		if (this.tween)
@@ -154,10 +157,10 @@ TopDownGame.Game.prototype = {
 			});
 		}
 	},
-	touched: function(event) {
+	touched: function(point) {
 		// @todo: make this work
-		console.log(event);
-		this.game.physics.arcade.moveToXY(this.player, event.position.x, event.position.y, 130, 10000);
+		this.game.physics.arcade.moveToXY(this.player, point.x, point.y, 130);
+		// this.game.physics.arcade.moveToXY(this.player, event.position.x, event.position.y, 130, 10000);
 	},
 	loseLife: function(player, shadow) {
 		this.player.reset(64, 64);
@@ -183,6 +186,10 @@ TopDownGame.Game.prototype = {
 		else if(this.cursors.right.isDown || rightKey.isDown) {
 			this.player.body.velocity.x += 130;
 		}
+		if(this.game.input.activePointer.isDown) {
+			// this.touched(this.game.input.activePointer.position);
+			this.game.physics.arcade.moveToPointer(this.player, 140);
+		}
 
 		if(pauseKey.isDown) {
 			this.game.pause();
@@ -196,7 +203,7 @@ TopDownGame.Game.prototype = {
 		// this.debugInformation();
 		//
 		// Taking care of the camera
-		this.moveCamera();
+		// this.moveCamera();
 
 		//Collision
 		this.game.physics.arcade.collide(this.player, this.collisionLayer);
