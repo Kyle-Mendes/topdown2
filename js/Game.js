@@ -33,6 +33,10 @@ TopDownGame.Game.prototype = {
 		//resize the gameworld to match the layer dimensions
 		this.backgroundLayer.resizeWorld();
 
+		//Adding doors and keys
+		this.createDoors();
+		this.createKeys();
+
 		//the player
 		// var result = this.findObjectsByType('playerStart', this.map, 'objectLayer');
 		this.player = this.game.add.sprite(64, 64, 'player');
@@ -91,9 +95,31 @@ TopDownGame.Game.prototype = {
 			sprite[key] = element.properties[key];
 		});
 	},
+	createDoors: function() {
+		//create any doors on the map
+		this.doors = this.game.add.group();
+		this.doors.enableBody = true;
+
+		var doors;
+		result = this.findObjectsByType('door', this.map, 'objectLayer');
+		result.forEach(function(element){
+			this.createFromTiledObject(element, this.doors);
+		}, this);
+	},
+	createKeys: function() {
+		//create any keys on the map
+		this.keys = this.game.add.group();
+		this.keys.enableBody = true;
+
+		var keys;
+		result = this.findObjectsByType('key', this.map, 'objectLayer');
+		result.forEach(function(element){
+			this.createFromTiledObject(element, this.keys);
+		}, this);
+	},
 	moveCamera: function() {
 		// @todo: fix camera movement.  maybe stop player movement while camera moving?
-		// @todo: find a way to make this work with touch controls
+		// @todo: find a way to make this work with touch controls?
 
 		// Don't allow tweens to build up if you go back and forth really fast
 		if (this.tween)
@@ -129,7 +155,19 @@ TopDownGame.Game.prototype = {
 		}
 	},
 	collect: function(player, collectable) {
+		console.log(collectable);
+		if(collectable.type == 'key') {
+			this.openDoor(collectable);
+		}
 		collectable.destroy();
+	},
+	openDoor: function(key) {
+		var doorID = key.doorID;
+		this.doors.forEach(function(door) {
+			if(door.doorID == doorID) {
+				door.loadTexture('openTrapdoor');
+			}
+		});
 	},
 	switchShadow: function(player, shadow) {
 		var deltaX = Math.abs(player.position.x - shadow.position.x);
@@ -143,18 +181,6 @@ TopDownGame.Game.prototype = {
 			shadow.loadTexture('shadow');
 			shadow.alpha = .8;
 			this.game.physics.arcade.moveToObject(shadow, player, 80);
-		}
-	},
-	debugInformation: function() {
-		var fps = this.game.time.fps;
-
-		if (debug) {
-			fpsCounter = this.game.add.text(20, 10, 'FPS: ' + fps, {
-				font: '16px Arial',
-				fill: '#fff',
-				stroke: '#000',
-				strokeThickness: 3
-			});
 		}
 	},
 	touched: function(point) {
@@ -175,19 +201,19 @@ TopDownGame.Game.prototype = {
 		this.player.body.velocity.y = 0;
 
 		if(this.cursors.up.isDown || upKey.isDown) {
-			this.player.body.velocity.y -= 130;
+			this.player.body.velocity.y -= 300;
 		}
 		else if(this.cursors.down.isDown || downKey.isDown) {
-			this.player.body.velocity.y += 130;
+			this.player.body.velocity.y += 300;
 		}
 		if(this.cursors.left.isDown || leftKey.isDown) {
-			this.player.body.velocity.x -= 130;
+			this.player.body.velocity.x -= 300;
 		}
 		else if(this.cursors.right.isDown || rightKey.isDown) {
-			this.player.body.velocity.x += 130;
+			this.player.body.velocity.x += 300;
 		}
 		if(this.game.input.activePointer.isDown) {
-			// this.touched(this.game.input.activePointer.position);
+			// @todo make it so you don't need to hold down the pointer
 			this.game.physics.arcade.moveToPointer(this.player, 140);
 		}
 
@@ -199,19 +225,16 @@ TopDownGame.Game.prototype = {
 			debug = !debug;
 		}
 
-		// @todo: right now, it makes a new line of text each frame, that's really bad
-		// this.debugInformation();
-		//
 		// Taking care of the camera
 		// this.moveCamera();
 
 		//Collision
 		this.game.physics.arcade.collide(this.player, this.collisionLayer);
+		this.game.physics.arcade.overlap(this.player, this.keys, this.collect, null, this);
 		this.game.physics.arcade.overlap(this.player, this.shadow, this.loseLife, null, this);
-		this.game.physics.arcade.overlap(this.player, this.gems, this.collect, null, this);
 
 		//Checking the shadow && player position to switch sprites when needed
-		this.switchShadow(this.player, this.shadow);
+		// this.switchShadow(this.player, this.shadow);
 
 		//Win condition
 
