@@ -6,7 +6,7 @@ TopDownGame.Preload = function() {};
 TopDownGame.Preload.prototype = {
 	preload: function() {
 		//load game assets
-		this.load.tilemap('map', 'assets/tilemaps/map.json', null, Phaser.Tilemap.TILED_JSON);
+		this.load.tilemap('map1', 'assets/tilemaps/map1.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.tilemap('map2', 'assets/tilemaps/map2.json', null, Phaser.Tilemap.TILED_JSON);
 		this.load.image('tiles', 'assets/images/tiles.png');
 		this.load.image('life', 'assets/images/heart.png');
@@ -39,7 +39,7 @@ TopDownGame.Preload.prototype = {
 		}
 
 		if (this.game.input.activePointer.isDown) {
-			this.state.start('Game');
+			this.state.start('Game', true, false, 'map1');
 		}
 	}
 };

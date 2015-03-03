@@ -12,12 +12,15 @@ var TopDownGame = TopDownGame || {},
 	debugKey,
 	lives;
 
-// TopDownGame.Game = function() {};
+TopDownGame.Game = function() {};
 
 //title screen
 TopDownGame.Game.prototype = {
+	init: function(mapData) {
+		this.mapData = mapData;
+	},
 	create: function() {
-		this.map = this.game.add.tilemap('map');
+		this.map = this.game.add.tilemap(this.mapData);
 		//the first parameter is the tileset as specified in Tiled, second is the key to the asset
 		this.map.addTilesetImage('tiles', 'tiles');
 
@@ -42,10 +45,11 @@ TopDownGame.Game.prototype = {
 		this.player = this.game.add.sprite(64, 64, 'player');
 		this.game.physics.arcade.enable(this.player);
 
-		//the shadow
-		var shadowLocation = this.findObjectsByType('shadowStart', this.map, 'objectLayer');
-		this.shadow = this.game.add.sprite(shadowLocation[0].x, shadowLocation[0].y, 'shadow');
-		this.game.physics.arcade.enable(this.shadow);
+		// //the shadow
+		// @todo: make the shadow conditional. Probably in it's own load function, like doors
+		// var shadowLocation = this.findObjectsByType('shadowStart', this.map, 'objectLayer');
+		// this.shadow = this.game.add.sprite(shadowLocation[0].x, shadowLocation[0].y, 'shadow');
+		// this.game.physics.arcade.enable(this.shadow);
 
 		//allowing character to move
 		this.cursors = this.game.input.keyboard.createCursorKeys();
@@ -140,11 +144,10 @@ TopDownGame.Game.prototype = {
 	},
 	changeMap: function(player, door) {
 		if(!door.open) {
-			console.log(door.open);
 			return;
 		}
 		var newMap = door.targetTilemap;
-		this.game.state.start()
+		this.game.state.start('Game', true, false, newMap);
 	},
 	switchShadow: function(player, shadow) {
 		var deltaX = Math.abs(player.position.x - shadow.position.x);
