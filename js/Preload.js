@@ -12,6 +12,8 @@ TopDownGame.Preload.prototype = {
 		this.load.image('life', 'assets/images/heart.png');
 		this.load.image('closedTrapdoor', 'assets/images/closedTrapdoor.png');
 		this.load.image('openTrapdoor', 'assets/images/openTrapdoor.png');
+		this.load.image('stairsUp', 'assets/images/stairsUp.png');
+		this.load.image('stairsDown', 'assets/images/stairsDown.png');
 		this.load.image('key', 'assets/images/key.png');
 		this.load.image('player', 'assets/images/player.png');
 		this.load.image('shadow', 'assets/images/shadow.png');
