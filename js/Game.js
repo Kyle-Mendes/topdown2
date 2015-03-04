@@ -46,10 +46,7 @@ TopDownGame.Game.prototype = {
 		this.game.physics.arcade.enable(this.player);
 
 		// //the shadow
-		// @todo: make the shadow conditional. Probably in it's own load function, like doors
-		// var shadowLocation = this.findObjectsByType('shadowStart', this.map, 'objectLayer');
-		// this.shadow = this.game.add.sprite(shadowLocation[0].x, shadowLocation[0].y, 'shadow');
-		// this.game.physics.arcade.enable(this.shadow);
+		this.createEnemies();
 
 		//allowing character to move
 		this.cursors = this.game.input.keyboard.createCursorKeys();
@@ -112,7 +109,7 @@ TopDownGame.Game.prototype = {
 
 		var doors;
 		result = this.findObjectsByType('door', this.map, 'objectLayer');
-		result.forEach(function(element){
+		result.forEach(function(element) {
 			this.createFromTiledObject(element, this.doors);
 		}, this);
 	},
@@ -123,8 +120,19 @@ TopDownGame.Game.prototype = {
 
 		var keys;
 		result = this.findObjectsByType('key', this.map, 'objectLayer');
-		result.forEach(function(element){
+		result.forEach(function(element) {
 			this.createFromTiledObject(element, this.keys);
+		}, this);
+	},
+	createEnemies: function() {
+		this.enemies = this.game.add.group();
+		this.enemies.enableBody = true;
+
+		var enemies;
+		result = this.findObjectsByType('enemy', this.map, 'objectLayer');
+		result.forEach(function(element) {
+			this.createFromTiledObject(element, this.enemies);
+			this.game.physics.arcade.enable(element);
 		}, this);
 	},
 	collect: function(player, collectable) {
@@ -149,19 +157,23 @@ TopDownGame.Game.prototype = {
 		var newMap = door.targetTilemap;
 		this.game.state.start('Game', true, false, newMap);
 	},
-	switchShadow: function(player, shadow) {
-		var deltaX = Math.abs(player.position.x - shadow.position.x);
-		var deltaY = Math.abs(player.position.y - shadow.position.y);
+	switchShadow: function() {
+		var player = this.player,
+			game = this.game;
+		this.enemies.forEach(function(shadow) {
+			var deltaX = Math.abs(player.position.x - shadow.position.x);
+			var deltaY = Math.abs(player.position.y - shadow.position.y);
 
-		if(deltaX < 160 && deltaY < 160) {
-			shadow.loadTexture('enemy');
-			shadow.alpha = 1;
-			this.game.physics.arcade.moveToObject(shadow, player, 115);
-		} else {
-			shadow.loadTexture('shadow');
-			shadow.alpha = .8;
-			this.game.physics.arcade.moveToObject(shadow, player, 80);
-		}
+			if(deltaX < 160 && deltaY < 160) {
+				shadow.loadTexture('enemy');
+				shadow.alpha = 1;
+				game.physics.arcade.moveToObject(shadow, player, 115);
+			} else {
+				shadow.loadTexture('shadow');
+				shadow.alpha = .8;
+				game.physics.arcade.moveToObject(shadow, player, 80);
+			}
+		});
 	},
 	loseLife: function(player, shadow) {
 		this.player.reset(64, 64);
@@ -204,10 +216,10 @@ TopDownGame.Game.prototype = {
 		this.game.physics.arcade.collide(this.player, this.collisionLayer);
 		this.game.physics.arcade.overlap(this.player, this.doors, this.changeMap, null, this);
 		this.game.physics.arcade.overlap(this.player, this.keys, this.collect, null, this);
-		this.game.physics.arcade.overlap(this.player, this.shadow, this.loseLife, null, this);
+		this.game.physics.arcade.overlap(this.player, this.enemies, this.loseLife, null, this);
 
 		//Checking the shadow && player position to switch sprites when needed
-		// this.switchShadow(this.player, this.shadow);
+		this.switchShadow();
 
 		//Win condition
 

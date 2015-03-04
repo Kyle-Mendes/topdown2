@@ -34,7 +34,7 @@
                  "name":"Monster",
                  "properties":
                     {
-                     "type":"shadowStart"
+                     "type":"enemy"
                     },
                  "rotation":0,
                  "type":"",
