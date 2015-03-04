@@ -1,3 +1,10 @@
+(function(name,data){
+ if(typeof onTileMapLoaded === 'undefined') {
+  if(typeof TileMaps === 'undefined') TileMaps = {};
+  TileMaps[name] = data;
+ } else {
+  onTileMapLoaded(name,data);
+ }})("map2",
 { "height":20,
  "layers":[
         {
@@ -105,4 +112,4 @@
  "tilewidth":32,
  "version":1,
  "width":20
-}
+});

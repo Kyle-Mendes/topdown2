@@ -9,7 +9,12 @@ TopDownGame.GameOver.prototype = {
 	},
 	update: function() {
 		if (this.game.input.activePointer.isDown) {
-			this.state.start('Game');
+			var initialMap = {
+				targetTilemap: 'map1',
+				targetX: 64,
+				targetY: 64
+			};
+			this.state.start('Game', true, false, initialMap);
 		}
 	}
 };

@@ -18,9 +18,14 @@ TopDownGame.Game = function() {};
 TopDownGame.Game.prototype = {
 	init: function(mapData) {
 		this.mapData = mapData;
+		this.targetX = parseInt(mapData.targetX) || 32;
+		this.targetY = parseInt(mapData.targetY) || 32;
+		this.mapToLoad = mapData.targetTilemap;
 	},
 	create: function() {
-		this.map = this.game.add.tilemap(this.mapData);
+		this.map = this.game.add.tilemap(this.mapToLoad)
+		console.log(this.map);
+
 		//the first parameter is the tileset as specified in Tiled, second is the key to the asset
 		this.map.addTilesetImage('tiles', 'tiles');
 
@@ -41,8 +46,7 @@ TopDownGame.Game.prototype = {
 		this.createKeys();
 
 		//the player
-		// var result = this.findObjectsByType('playerStart', this.map, 'objectLayer');
-		this.player = this.game.add.sprite(64, 64, 'player');
+		this.player = this.game.add.sprite(this.targetX, this.targetY, 'player');
 		this.game.physics.arcade.enable(this.player);
 
 		// //the shadow
@@ -154,8 +158,9 @@ TopDownGame.Game.prototype = {
 		if(!door.open) {
 			return;
 		}
-		var newMap = door.targetTilemap;
-		this.game.state.start('Game', true, false, newMap);
+		// var newMap = door.targetTilemap;
+		// @todo: figure out how to preserve state between maps
+		this.game.state.start('Game', true, false, door);
 	},
 	switchShadow: function() {
 		var player = this.player,

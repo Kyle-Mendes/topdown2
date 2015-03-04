@@ -54,8 +54,8 @@
                      "open":"false",
                      "sprite":"closedTrapdoor",
                      "targetTilemap":"map2",
-                     "targetX":"32",
-                     "targetY":"32",
+                     "targetX":"256",
+                     "targetY":"192",
                      "type":"door"
                     },
                  "rotation":0,
@@ -112,7 +112,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":12,
+ "nextobjectid":13,
  "orientation":"orthogonal",
  "properties":
     {

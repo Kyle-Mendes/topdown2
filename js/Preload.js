@@ -41,7 +41,12 @@ TopDownGame.Preload.prototype = {
 		}
 
 		if (this.game.input.activePointer.isDown) {
-			this.state.start('Game', true, false, 'map1');
+			var initialMap = {
+				targetTilemap: 'map1',
+				targetX: 64,
+				targetY: 64
+			};
+			this.state.start('Game', true, false, initialMap);
 		}
 	}
 };
